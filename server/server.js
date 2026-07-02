@@ -1,15 +1,17 @@
 import {Server} from 'socket.io';
 import express from "express";
 import http from "http";
-
+import cors from 'cors';
 
 
 const app = express();
+app.use(cors());
 
 const server = http.createServer(app);
 
 const io = new Server(server, {
-    cors: {origin: "*"}
+    cors: {origin: "*"},
+    methods: ["GET", "POST"]
 });
 
 io.on('connection', (socket) => {
@@ -23,6 +25,9 @@ io.on('connection', (socket) => {
     io.emit('notification', { message: `User said: ${data.text}` });
   });
 });
+
+
+
 
 server.listen(3000, ()=>{
     console.log("Pulse server live on Port: 3000");

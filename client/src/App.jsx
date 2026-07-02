@@ -1,122 +1,77 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import React, { useEffect, useState } from 'react';
+import { io } from 'socket.io-client';
+import MainLayout from './layouts/MainLayout.jsx';
+import MessageStream from './features/chat/components/MessageStream.jsx';
+import CompositionInput from './features/chat/components/CompositionInput.jsx';
 
-function App() {
-  const [count, setCount] = useState(0)
+// Instantiate backend hook linkage instance globally to avoid component re-render loops
+const socket = io('http://localhost:3000');
+const CURRENT_ROOM = 'public-lobby';
+
+export default function App() {
+  const [messages, setMessages] = useState([
+    {
+      id: 0,
+      username: '@system_bot',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80',
+      badge: 'Cluster Core',
+      timestamp: '12:00 PM',
+      content: 'Welcome to the Pulse9 live stream matrix room.',
+      hasVerse: false
+    }
+  ]);
+
+  useEffect(() => {
+    // Notify the backend cluster instance to register this component instance to the target room
+    socket.emit('join_room', CURRENT_ROOM);
+
+    // Listens for structural payload relays broadcasting down from outside clients
+    socket.on('receive_message', (data) => {
+      setMessages((prevMessages) => [...prevMessages, data]);
+    });
+
+    // Cleanup logic on unmount routines
+    return () => {
+      socket.off('receive_message');
+    };
+  }, []);
+
+  const handleSendMessage = (messageText) => {
+    const messagePayload = {
+      room: CURRENT_ROOM,
+      username: '@current_user', // Local identity string mock tracking state
+      content: messageText,
+    };
+
+    // 1. Instantly push client message locally to our own user layout display
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        id: Date.now(),
+        username: '@current_user',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80',
+        badge: 'You',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        content: messageText,
+        hasVerse: messageText.includes('#')
+      }
+    ]);
+
+    // 2. Deliver the payload transaction over to the websocket cluster pipeline nodes
+    socket.emit('send_message', messagePayload);
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <MainLayout>
+      <div className="bg-slate-50/50 border-b border-slate-200/80 p-4 flex items-center justify-between shadow-xs">
+        <div className="flex items-center space-x-3">
+          <span className="text-emerald-500 text-lg font-mono animate-pulse">#</span>
+          <h2 className="text-sm font-semibold text-slate-900">{CURRENT_ROOM}</h2>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      </div>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      <MessageStream messages={messages} />
+      <CompositionInput onSendMessage={handleSendMessage} />
+    </MainLayout>
+  );
 }
-
-export default App

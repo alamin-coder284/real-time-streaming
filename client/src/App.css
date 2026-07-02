@@ -1,5 +1,36 @@
 @import "tailwindcss";
 
 html {
-  scroll-behavior: smooth
+  scroll-behavior: smooth;
+}
+
+@keyframes subtleSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dynamicGlow {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-message {
+  animation: subtleSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animated-gradient-border {
+  background: linear-gradient(270deg, #10b981, #34d399, #6ee7b7, #10b981);
+  background-size: 600% 600%;
+  animation: dynamicGlow 6s ease infinite;
 }
