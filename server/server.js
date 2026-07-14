@@ -28,10 +28,24 @@ io.on("connection", socket => {
             joinedAt: new Date()
         });
 
+        const systemMessage = {
+            id: Date.now(),
+            type: "system",
+            text: `${username} joined the conversation.`,
+            timestamp: new Date().toISOString()
+        };
+
+        messageHistory.push(systemMessage);
+
+        if (messageHistory.length > MAX_HISTORY) {
+            messageHistory.shift();
+        }
+        io.emit("receive-message", systemMessage);
+
         // boradcast to all users about new user joining
         io.emit("user-joined", {
             username: username,
-            users: Array.from(users.value())
+            users: Array.from(users.values())
         });
 
         socket.emit("message-history", messageHistory);
@@ -55,6 +69,7 @@ io.on("connection", socket => {
             if (messageHistory.length > MAX_HISTORY) {
                 messageHistory.shift();
             }
+            io.emit("receive-message", messageData);
         }
     });
     // -- end listening to chat-message
@@ -63,7 +78,7 @@ io.on("connection", socket => {
     socket.on("typing", isTyping => {
         const user = users.get(socket.id);
         if (user) {
-            socket.boradcast.emit("user-typing", {
+            socket.broadcast.emit("user-typing", {
                 username: user.username,
                 isTyping: isTyping
             });
@@ -80,35 +95,52 @@ io.on("connection", socket => {
 
         if (fromUser && toUser) {
             const privateMessage = {
-                from: fromUser.username,
-                to: toUser.username,
-                text: message,
-                timestamp: new Date().toISOString()
-            };
-        }
+    fromUserId: socket.id,
+    toUserId: toUserId,
 
-        socket.emit("private-message", privateMessage);
-        io.to(toUserId).emit("private-message", privateMessage);
+    from: fromUser.username,
+    to: toUser.username,
+
+    text: message,
+    timestamp: new Date().toISOString()
+};
+            socket.emit("private-message", privateMessage);
+            io.to(toUserId).emit("private-message", privateMessage);
+        }
     });
     // -- end handling private messages
-    
-    socket.on('disconnect',()=>{
-      const user = users.get(socket.id);
-      
-      if(user) {
-        users.delete(socket.id);
-        io.emit('user-left',{
-          username: user.username,
-          users: Array.from(users.value())
-        });
-        console.log(`${user.username} has left the chatroom!`);
-      }
+
+    socket.on("disconnect", () => {
+        const user = users.get(socket.id);
+
+        if (user) {
+            users.delete(socket.id);
+            const systemMessage = {
+                id: Date.now(),
+                type: "system",
+                text: `${user.username} left the conversation.`,
+                timestamp: new Date().toISOString()
+            };
+
+            messageHistory.push(systemMessage);
+
+            if (messageHistory.length > MAX_HISTORY) {
+                messageHistory.shift();
+            }
+
+            io.emit("receive-message", systemMessage);
+
+            io.emit("user-left", {
+                username: user.username,
+                users: Array.from(users.values())
+            });
+            console.log(`${user.username} has left the chatroom!`);
+        }
     });
-    
-    socket.on('error', (error)=>{
-      console.log('Socket error: ', error);
+
+    socket.on("error", error => {
+        console.log("Socket error: ", error);
     });
-    
 });
 
 server.listen(3000, () => {
