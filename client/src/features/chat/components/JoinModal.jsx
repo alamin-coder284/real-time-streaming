@@ -13,8 +13,8 @@ const Modal = ({ onJoin }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 backdrop-blur-sm">
-            <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 backdrop-blur-sm p-4">
+            <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-2xl">
                 <div className="mb-8 text-center">
                     <h1 className="text-3xl font-bold text-emerald-600">
                         Pulse9

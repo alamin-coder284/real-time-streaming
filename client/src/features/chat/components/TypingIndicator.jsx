@@ -14,7 +14,7 @@ export default function TypingIndicator({ users }) {
     }
 
     return (
-        <div className="px-6 py-2 text-sm text-slate-500 flex items-center gap-2">
+        <div className="px-4 sm:px-6 py-2 text-sm text-slate-500 flex items-center gap-2 flex-shrink-0">
             <div className="flex gap-1">
                 <span
                     className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce"

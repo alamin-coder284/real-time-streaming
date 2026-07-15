@@ -1,9 +1,8 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import socket from "../services/socket.js";
 
 export default function CompositionInput({ onSendMessage }) {
     const [typedValue, setTypedValue] = useState("");
-
     const typingTimeout = useRef(null);
 
     const handleChange = e => {
@@ -12,71 +11,62 @@ export default function CompositionInput({ onSendMessage }) {
         socket.emit("typing", true);
 
         clearTimeout(typingTimeout.current);
-
         typingTimeout.current = setTimeout(() => {
             socket.emit("typing", false);
         }, 1000);
     };
+
     const handleSubmit = e => {
         e.preventDefault();
         if (!typedValue.trim()) return;
 
-        onSendMessage(typedValue);
-        setTypedValue(""); // Clear input box value
+        onSendMessage(typedValue.trim());
+        setTypedValue("");
+        clearTimeout(typingTimeout.current);
         socket.emit("typing", false);
     };
 
     return (
-        <div className="p-4 bg-white border-t border-slate-200">
+        <div className="safe-bottom p-3 sm:p-4 bg-white border-t border-slate-200 flex-shrink-0">
             <form
                 onSubmit={handleSubmit}
-                className="bg-slate-50 border border-slate-200 rounded-xl focus-within:bg-white focus-within:border-emerald-600 focus-within:ring-4 focus-within:ring-emerald-600/5 transition duration-200 flex flex-col shadow-xs"
+                className="bg-slate-50 border border-slate-200 rounded-2xl focus-within:bg-white focus-within:border-emerald-600
+                           focus-within:ring-4 focus-within:ring-emerald-600/5 transition duration-200
+                           flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 shadow-xs"
             >
-                <div className="flex items-center justify-between border-b border-slate-200/60 px-3 py-1.5 bg-slate-50/50 rounded-t-xl">
-                    <div className="flex items-center space-x-3 text-slate-400 text-xs">
-                        <button
-                            type="button"
-                            className="hover:text-slate-600 transition p-1"
-                        >
-                            <i className="fa-solid fa-paragraph"></i>
-                        </button>
-                        <button
-                            type="button"
-                            className="hover:text-slate-600 transition p-1"
-                        >
-                            <i className="fa-solid fa-bold"></i>
-                        </button>
-                        <button
-                            type="button"
-                            className="hover:text-slate-600 transition p-1"
-                        >
-                            <i className="fa-solid fa-code"></i>
-                        </button>
-                    </div>
-                    <div className="text-[10px] font-mono text-slate-400 flex items-center space-x-1">
-                        <span className="inline-block w-1 h-1 rounded-full bg-emerald-500 animate-ping"></span>
-                        <span>Parsing Socket Stream Active</span>
-                    </div>
-                </div>
+                <button
+                    type="button"
+                    className="hidden sm:flex text-slate-400 hover:text-emerald-600 transition p-2 rounded-full hover:bg-slate-100 flex-shrink-0"
+                    aria-label="Attach"
+                >
+                    <i className="fa-solid fa-paperclip"></i>
+                </button>
 
-                <div className="flex items-center p-3">
-                    <input
-                        type="text"
-                        value={typedValue}
-                        onChange={handleChange}
-                        placeholder="Type a message to pulse9 or reference a surah tag... (e.g., #6:162)"
-                        className="bg-transparent flex-1 focus:outline-none text-sm text-slate-800 px-1 placeholder-slate-400"
-                    />
-                    <div className="flex items-center space-x-2 pl-2">
-                        <button
-                            type="submit"
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-1.5 rounded-lg text-xs transition duration-150 flex items-center space-x-1.5"
-                        >
-                            <span>Send</span>
-                            <i className="fa-regular fa-paper-plane text-[10px]"></i>
-                        </button>
-                    </div>
-                </div>
+                <input
+                    type="text"
+                    value={typedValue}
+                    onChange={handleChange}
+                    placeholder="Message #public-lobby... (e.g., #6:162)"
+                    className="bg-transparent flex-1 min-w-0 focus:outline-none text-sm text-slate-800 px-1.5 py-2 placeholder-slate-400"
+                />
+
+                <button
+                    type="button"
+                    className="text-slate-400 hover:text-emerald-600 transition p-2 rounded-full hover:bg-slate-100 flex-shrink-0"
+                    aria-label="Emoji"
+                >
+                    <i className="fa-regular fa-face-smile"></i>
+                </button>
+
+                <button
+                    type="submit"
+                    disabled={!typedValue.trim()}
+                    className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:hover:bg-emerald-600
+                               text-white w-9 h-9 rounded-full text-sm transition duration-150 flex items-center justify-center flex-shrink-0"
+                    aria-label="Send"
+                >
+                    <i className="fa-solid fa-paper-plane text-xs"></i>
+                </button>
             </form>
         </div>
     );

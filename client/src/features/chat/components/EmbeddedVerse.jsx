@@ -1,4 +1,3 @@
-import React from 'react';
 
 export default function EmbeddedVerse() {
   return (
@@ -13,7 +12,7 @@ export default function EmbeddedVerse() {
           </a>
         </div>
         {/* Render fallback layout handling if standard arabic web-fonts require loading latency buffers */}
-        <p className="font-serif text-right text-2xl text-slate-900 leading-loose py-2 tracking-wide font-normal selection:bg-emerald-100">
+        <p className="font-serif text-right text-xl sm:text-2xl text-slate-900 leading-loose py-2 tracking-wide font-normal selection:bg-emerald-100 break-words">
           قُلْ إِنَّ صَلَاتِي وَنُسُكِي وَمَحْيَايَ وَمَمَاتِي لِلَّهِ رَبِّ الْعَالَمِينَ
         </p>
         <p className="text-xs text-slate-500 italic leading-relaxed pt-1 font-sans">

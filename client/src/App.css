@@ -29,6 +29,51 @@ html {
   animation: subtleSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+@keyframes toastIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-toast-in {
+  animation: toastIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pillIn {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.animate-pill-in {
+  animation: pillIn 0.2s ease-out both;
+}
+
+/* Use the dynamic viewport height so mobile browser chrome (address bar) never
+   clips the composer or causes the page to jump while typing. */
+.app-shell-height {
+  height: 100vh;
+  height: 100dvh;
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 .animated-gradient-border {
   background: linear-gradient(270deg, #10b981, #34d399, #6ee7b7, #10b981);
   background-size: 600% 600%;
