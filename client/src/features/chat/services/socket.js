@@ -1,4 +1,6 @@
 import { io } from "socket.io-client";
-const socket = io("https://pulse9.onrender.com");
+
+const baseURL = "https://pulse9.onrender.com";
+const socket = io(baseURL);
 
 export default socket;
